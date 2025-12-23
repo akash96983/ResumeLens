@@ -1,7 +1,27 @@
+import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
+  useEffect(() => {
+    const observerOptions = {
+      threshold: 0.1,
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("active");
+        }
+      });
+    }, observerOptions);
+
+    const revealElements = document.querySelectorAll(".reveal");
+    revealElements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground selection:bg-primary/30 selection:text-foreground">
       {/* Navbar */}
@@ -28,7 +48,7 @@ export default function Home() {
         {/* Hero Section */}
         <section className="relative px-6 py-20 lg:py-32 overflow-hidden">
           <div className="absolute top-0 left-1/2 -z-10 h-[600px] w-full -translate-x-1/2 bg-hero-glow blur-3xl opacity-50" />
-          <div className="mx-auto max-w-7xl text-center">
+          <div className="mx-auto max-w-7xl text-center animate-fade-in-up">
             <div className="mb-8 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
               <span className="mr-2">✨</span> AI-Powered Resume Optimization
             </div>
@@ -59,7 +79,7 @@ export default function Home() {
                 { label: "Average Score Improvement", value: "35%" },
                 { label: "Job Seekers Joined", value: "10k+" },
               ].map((stat, i) => (
-                <div key={i} className="text-center">
+                <div key={i} className="text-center reveal">
                   <div className="text-2xl font-bold text-primary md:text-3xl">{stat.value}</div>
                   <div className="mt-2 text-sm text-foreground/60">{stat.label}</div>
                 </div>
@@ -103,23 +123,80 @@ export default function Home() {
           </div>
         </section>
 
-        {/* How It Works Section placeholder */}
-        <section id="how-it-works" className="px-6 py-24 bg-accent/30">
-          <div className="mx-auto max-w-7xl">
+        {/* How It Works Section */}
+        <section id="how-it-works" className="px-6 py-24 bg-accent/30 relative overflow-hidden">
+          <div className="mx-auto max-w-7xl relative z-10">
             <div className="mb-16 text-center">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">How It <span className="text-gradient">Works</span></h2>
               <p className="mt-4 text-foreground/60">Land your dream job in three simple steps.</p>
             </div>
-            <div className="grid gap-12 md:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-3">
               {[
-                { step: "01", title: "Upload Resume", desc: "Drag and drop your PDF or DOCX file." },
-                { step: "02", title: "Analyze & Score", desc: "Get an instant score based on industry standards." },
-                { step: "03", title: "Optimize", desc: "Follow AI suggestions to improve your resume." }
+                { step: "01", title: "Upload Resume", desc: "Drag and drop your PDF or DOCX file to our secure server." },
+                { step: "02", title: "Analyze & Score", desc: "Our AI compares your resume against target job descriptions." },
+                { step: "03", title: "Optimize", desc: "Follow personalized suggestions to fix gaps and boost your score." }
               ].map((item, i) => (
-                <div key={i} className="relative">
-                  <div className="text-5xl font-black text-primary/10 mb-4">{item.step}</div>
-                  <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                <div key={i} className="group relative rounded-3xl border border-border bg-background p-8 transition-all hover:-translate-y-2">
+                  <div className="absolute -top-6 left-8 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-xl font-bold text-white shadow-xl shadow-primary/30">
+                    {item.step}
+                  </div>
+                  <h3 className="mb-3 mt-4 text-xl font-bold">{item.title}</h3>
                   <p className="text-foreground/60">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing Section */}
+        <section id="pricing" className="px-6 py-24 lg:py-32">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-16 text-center">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Simple, <span className="text-gradient">Transparent</span> Pricing</h2>
+              <p className="mt-4 text-foreground/60">Choose the plan that's right for your career journey.</p>
+            </div>
+            <div className="grid gap-8 md:grid-cols-3">
+              {[
+                { name: "Basic", price: "$0", features: ["1 Resume Analysis/mo", "Basic Score", "General Tips"], cta: "Start for Free", popular: false },
+                { name: "Pro", price: "$19", features: ["Unlimited Analysis", "Detailed Keyword Report", "ATS Formatting", "AI Summary Generator"], cta: "Go Pro Now", popular: true },
+                { name: "Career", price: "$49", features: ["Everything in Pro", "LinkedIn Optimization", "Cover Letter AI", "1-on-1 Strategy Session"], cta: "Contact Sales", popular: false },
+              ].map((plan, i) => (
+                <div key={i} className={`relative flex flex-col rounded-3xl border p-8 transition-all hover:scale-[1.02] ${plan.popular ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'border-border'}`}>
+                  {plan.popular && <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-bold text-white">MOST POPULAR</div>}
+                  <h3 className="text-lg font-bold">{plan.name}</h3>
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="text-4xl font-bold">{plan.price}</span>
+                    {plan.price !== "Free" && <span className="text-sm text-foreground/60">/month</span>}
+                  </div>
+                  <ul className="mt-8 flex-1 space-y-4">
+                    {plan.features.map((feature, j) => (
+                      <li key={j} className="flex items-center gap-3 text-sm text-foreground/80">
+                        <span className="text-primary">✓</span> {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  <button className={`mt-8 w-full rounded-2xl py-4 font-bold transition-all ${plan.popular ? 'bg-primary text-white shadow-lg shadow-primary/25' : 'border border-border hover:bg-foreground/5'}`}>
+                    {plan.cta}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section id="faq" className="px-6 py-24 bg-accent/30">
+          <div className="mx-auto max-w-3xl">
+            <h2 className="mb-12 text-center text-3xl font-bold tracking-tight sm:text-4xl">Frequently Asked <span className="text-gradient">Questions</span></h2>
+            <div className="space-y-4">
+              {[
+                { q: "Is ResumeLens secure?", a: "Yes, we use bank-level encryption to ensure your personal data and resume content are completely secure." },
+                { q: "Can I use it for free?", a: "Absolutely! Our Basic plan allows for one full resume analysis every month at no cost." },
+                { q: "How accurate is the AI?", a: "Our AI is trained on thousands of successful resumes and industry-standard ATS algorithms for high accuracy." },
+              ].map((faq, i) => (
+                <div key={i} className="rounded-2xl border border-border bg-background p-6">
+                  <h3 className="font-bold">{faq.q}</h3>
+                  <p className="mt-2 text-sm text-foreground/60 leading-relaxed">{faq.a}</p>
                 </div>
               ))}
             </div>
@@ -135,14 +212,15 @@ export default function Home() {
               </div>
               <span className="text-lg font-bold">ResumeLens</span>
             </div>
-            <p className="text-sm text-foreground/40">© 2025 ResumeLens. All rights reserved.</p>
+            <p className="text-sm text-foreground/40 text-center">© 2025 ResumeLens. Empouring job seekers with AI. All rights reserved.</p>
             <div className="flex gap-6">
-              <Link href="#" className="text-sm text-foreground/60 hover:text-primary">Terms</Link>
-              <Link href="#" className="text-sm text-foreground/60 hover:text-primary">Privacy</Link>
+              <Link href="#" className="text-sm text-foreground/60 hover:text-primary transition-colors">Terms</Link>
+              <Link href="#" className="text-sm text-foreground/60 hover:text-primary transition-colors">Privacy</Link>
+              <Link href="#" className="text-sm text-foreground/60 hover:text-primary transition-colors">Cookies</Link>
             </div>
           </div>
         </footer>
       </main>
-    </div>
+    </div >
   );
 }
