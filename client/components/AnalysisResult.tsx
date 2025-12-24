@@ -15,6 +15,8 @@ interface AnalysisResultProps {
 }
 
 export const AnalysisResult: React.FC<AnalysisResultProps> = ({ analysis, onStartInterview }) => {
+    const matchScore = typeof analysis.matchScore === 'number' && !isNaN(analysis.matchScore) ? analysis.matchScore : 0;
+
     return (
         <div className="container-width section-padding animate-fade-in-up">
             <div className="reveal active flex flex-col items-center text-center">
@@ -31,7 +33,7 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({ analysis, onStar
                             className="stroke-primary fill-none transition-all duration-1000 ease-out"
                             strokeWidth="10"
                             strokeDasharray={2 * Math.PI * 40}
-                            strokeDashoffset={2 * Math.PI * 40 * (1 - analysis.matchScore / 100)}
+                            strokeDashoffset={2 * Math.PI * 40 * (1 - matchScore / 100)}
                             strokeLinecap="round"
                             r="40"
                             cx="50"
@@ -39,12 +41,12 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({ analysis, onStar
                         />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center text-3xl font-bold">
-                        {analysis.matchScore}%
+                        {matchScore}%
                     </div>
                 </div>
                 <h2 className="text-3xl font-bold mb-4">Match Score</h2>
                 <p className="max-w-xl text-muted">
-                    Your resume is a {analysis.matchScore < 70 ? 'moderate' : 'strong'} match for this role.
+                    Your resume is a {matchScore < 70 ? 'moderate' : 'strong'} match for this role.
                     Focus on the missing keywords below to improve your score.
                 </p>
             </div>
@@ -55,18 +57,22 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({ analysis, onStar
                         <span className="text-red-500">⚠</span> Missing Keywords
                     </h3>
                     <div className="flex flex-wrap gap-2">
-                        {analysis.missingKeywords.map((keyword, i) => (
-                            <span key={i} className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 border border-red-100">
-                                {keyword}
-                            </span>
-                        ))}
+                        {(analysis.missingKeywords || []).length > 0 ? (
+                            analysis.missingKeywords.map((keyword, i) => (
+                                <span key={i} className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 border border-red-100">
+                                    {keyword}
+                                </span>
+                            ))
+                        ) : (
+                            <p className="text-sm text-muted">No missing keywords identified.</p>
+                        )}
                     </div>
                 </div>
 
                 <div className="reveal active card-simple">
                     <h3 className="text-xl font-bold mb-6">Section-by-Section Critique</h3>
                     <div className="space-y-6">
-                        {Object.entries(analysis.sectionCritique).map(([section, critique], i) => (
+                        {analysis.sectionCritique && Object.entries(analysis.sectionCritique).map(([section, critique], i) => (
                             <div key={i}>
                                 <h4 className="font-bold text-sm uppercase tracking-wider text-muted mb-2">{section}</h4>
                                 <p className="text-sm leading-relaxed">{critique}</p>

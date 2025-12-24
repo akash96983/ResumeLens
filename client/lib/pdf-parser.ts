@@ -1,3 +1,10 @@
+// Provide polyfills for browser APIs expected by some versions of pdfjs-dist used by pdf-parse
+if (typeof global !== 'undefined') {
+    if (!(global as any).DOMMatrix) (global as any).DOMMatrix = class DOMMatrix { };
+    if (!(global as any).ImageData) (global as any).ImageData = class ImageData { };
+    if (!(global as any).Path2D) (global as any).Path2D = class Path2D { };
+}
+
 const pdf = require('pdf-parse');
 
 /**
